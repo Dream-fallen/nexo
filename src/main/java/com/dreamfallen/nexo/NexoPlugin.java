@@ -21,7 +21,7 @@ public class NexoPlugin extends JavaPlugin {
     }
 
     public void loadAllScripts() {
-        File[] files = scriptsFolder.listFiles((dir, name) -> name.endsWith(".nexo")
+        File[] files = scriptsFolder.listFiles((dir, name) -> name.endsWith(".nexo"));
         if (files == null) return;
 
         for (File scriptFile : files) {
