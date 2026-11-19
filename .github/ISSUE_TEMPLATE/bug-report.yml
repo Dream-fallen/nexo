@@ -1,0 +1,102 @@
+name: Bug Report
+description: Report a bug, duh.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting an issue with **Nexo**! Please fill out the details below so we can reproduce and fix the problem quickly.
+        *(Note: Nexo does not support legacy `.sk` files—please only report issues with `.nx` scripts.)*
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: e.g., Calling player.send_message() inside a player_join event throws a NullPointerException.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: syntax-mode
+    attributes:
+      label: Syntax Mode
+      description: Which syntax mode is declared on the first line of your `.nx` file?
+      options:
+        - using py (Python Mode)
+        - using js (JavaScript Mode)
+        - Both / Mode-independent
+        - N/A (Plugin startup / general crash)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: modules
+    attributes:
+      label: Built-in Modules Used
+      description: Select any built-in modules imported via `require()` in the affected script.
+      options:
+        - label: None (Core Nexo)
+        - label: skbee
+        - label: skellett
+        - label: skquery
+        - label: skrayfall
+        - label: tuske
+
+  - type: dropdown
+    id: conflict-resolution
+    attributes:
+      label: Module Import Method
+      description: If using modules, how are they imported?
+      options:
+        - N/A
+        - Basic import (`require(module)`)
+        - Namespaced import (`with alias`)
+        - Priority override (`with priority`)
+
+  - type: textarea
+    id: script-reproduction
+    attributes:
+      label: Minimal `.nx` Script Reproduction
+      description: Provide the smallest possible `.nx` script that reproduces the issue (including the top `using` and `require` lines).
+      render: python
+      placeholder: |
+        using py
+        require(skbee)
+
+        @event("player_join")
+        def on_join(event):
+            event.player.send_message("Hello!")
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-vs-actual
+    attributes:
+      label: Expected vs. Actual Behavior
+      description: What did you expect to happen, and what actually happened?
+      placeholder: |
+        **Expected:** The player receives a green welcome message.
+        **Actual:** A syntax error is logged in the console on script reload.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console Logs / Stack Trace
+      description: Paste any relevant Nexo parser errors or server stack traces here.
+      render: shell
+      placeholder: Paste your server console output here...
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Server Environment
+      description: Please provide your version details.
+      value: |
+        - **Nexo Version:** (e.g., v0.1.0 or commit hash)
+        - **Server Software & Version:** (e.g., Paper 1.21.4)
+        - **Java Version:** (e.g., Java 21)
+    validations:
+      required: true
