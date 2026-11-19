@@ -1,0 +1,1 @@
+# Holds the implementation for `require()` modules and handles priority/alias conflict resolution. Create subpackages or files for each planned module (`skbee/`, `skquery/`, `skellet/`, `skrayfall/`, and `tuske/`)
