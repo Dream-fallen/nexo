@@ -4,12 +4,13 @@
 
 ## Overview
 
-**Nexo** is a modern scripting plugin for Minecraft servers, based off of [Skript.](https://github.com/skriptlang/skript) Nexo lets developers write server logic using familiar **Python** or **JavaScript** syntax. while keeping the things that Skript is well known for.
+**Nexo** is a modern scripting plugin for Minecraft servers, based off of [Skript.](https://github.com/skriptlang/skript) Nexo lets server staff write server logic using familiar **Python** or **JavaScript** syntax, while keeping the things that Skript is well known for.
 
 ### Design
 * **Not Backwards Compatible:** Nexo is a ground-up redesign and does NOT support `.sk` files.
-* **Minimal Bloat:** Redundant or otherwise niche Skript expressions are removed to keep Nexo fast.
+* **Minimal Bloat:** Redundant or otherwise niche Skript expressions, events, effects (e.g., `[the] (duplicat(e|ing|ion)|clon(e|ing)) cool[ ]down [time] [of %living entities%]`, `[on] bat toggle sleep`, `make [the] brewing stand consume [its|the] fuel`) are removed to keep Nexo fast.
 * **Built-In Addon Ecosystem:** Popular addons are reimagined as first-party modules with Nexo syntax.
+[Skellett](https://docs.skunity.com/syntax/search/addon:skellett), [SkQuery](https://docs.skunity.com/syntax/search/addon:skquery), [skRayFall](https://docs.skunity.com/syntax/search/addon:skrayfall), [TuSKe](https://docs.skunity.com/syntax/search/addon:tuske), [SkBee](https://docs.skunity.com/syntax/search/addon:skbee) and more are here.
 
 ---
 
