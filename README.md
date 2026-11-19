@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Nexo** (`.nx`) is a modern scripting plugin for Minecraft servers, based off of [Skript.](https://github.com/skriptlang/skript) Nexo lets developers write server logic using familiar **Python** or **JavaScript** syntax. while keeping the things that Skript is well known for.
+**Nexo** is a modern scripting plugin for Minecraft servers, based off of [Skript.](https://github.com/skriptlang/skript) Nexo lets developers write server logic using familiar **Python** or **JavaScript** syntax. while keeping the things that Skript is well known for.
 
 ### Design
 * **Not Backwards Compatible:** Nexo is a ground-up redesign and will **not** run `.sk` files.
