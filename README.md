@@ -7,9 +7,9 @@
 **Nexo** is a modern scripting plugin for Minecraft servers, based off of [Skript.](https://github.com/skriptlang/skript) Nexo lets developers write server logic using familiar **Python** or **JavaScript** syntax. while keeping the things that Skript is well known for.
 
 ### Design
-* **Not Backwards Compatible:** Nexo is a ground-up redesign and will **not** run `.sk` files.
-* **Zero Bloat:** Redundant Skript expressions are removed to keep Nexo fast.
-* **Built-In Addon Ecosystem:** Popular addons are reimagined as first-party modules with Nexo syntax
+* **Not Backwards Compatible:** Nexo is a ground-up redesign and does NOT support `.sk` files.
+* **Minimal Bloat:** Redundant or otherwise niche Skript expressions are removed to keep Nexo fast.
+* **Built-In Addon Ecosystem:** Popular addons are reimagined as first-party modules with Nexo syntax.
 
 ---
 
@@ -63,13 +63,11 @@ Nexo will feature custom, syntax-unified versions of classic Skript addons:
 To prevent syntax collisions between modules, Nexo enforces two mutually exclusive import rules: **Aliases** or **Priorities**. You may use one or the other per module, never both.
 
 #### 1. Basic Import
-Loads a module directly into the global scope.
 ```javascript
 require(skellett)
 ```
 
 #### 2. Namespaced Import (`with alias`)
-Isolates a module's syntax under a custom namespace so it can never conflict with other modules.
 ```javascript
 require(skquery) with alias query
 
@@ -77,8 +75,8 @@ require(skquery) with alias query
 query.openGui(player, "Server Menu", 3)
 ```
 
-#### 3. Priority Override (`with priority`)
-Resolves overlapping syntax between two global modules using a scale from `1` (highest) to `5` (lowest). If two modules define the same function or event, the module with the higher priority takes over.
+#### 3. Priority Import (`with priority`)
+If two modules define the same function or event, the module with the higher priority takes over. `1` (highest) to `5` (lowest).
 ```javascript
 require(tuske) with priority 1
 require(skbee) with priority 2
