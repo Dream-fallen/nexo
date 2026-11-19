@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/stuff/icon.jpg" alt="Nexo logo" title="cool freaking logo :D">
+  <img src="/stuff/bigger-icon.jpg" alt="Nexo logo" title="cool freaking logo :D">
 </p>
 
 <p align="center">
