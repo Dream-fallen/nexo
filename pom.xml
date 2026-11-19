@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://apache.org http://apache.org">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.yourname</groupId>
-    <artifactId>Nexo</artifactId>
+    <groupId>com.dreamfallen</groupId>
+    <artifactId>nexo</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21-R0.1-SNAPSHOT</version>
+            <version>1.21.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -47,7 +47,6 @@
         </resources>
 
         <plugins>
-            <!-- 1. Compile Kotlin first -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -68,7 +67,6 @@
                 </executions>
             </plugin>
 
-            <!-- 2. Compile Java second (allows mixing Java and Kotlin) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -88,7 +86,6 @@
                 </executions>
             </plugin>
 
-            <!-- 3. Bundle Kotlin stdlib into your final JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -103,9 +100,19 @@
                             <relocations>
                                 <relocation>
                                     <pattern>kotlin</pattern>
-                                    <shadedPattern>com.yourname.nexo.libs.kotlin</shadedPattern>
+                                    <shadedPattern>com.dreamfallen.nexo.libs.kotlin</shadedPattern>
                                 </relocation>
                             </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
