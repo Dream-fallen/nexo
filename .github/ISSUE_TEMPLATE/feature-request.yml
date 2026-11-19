@@ -1,0 +1,81 @@
+name: Feature Request
+description: Propose a new cool things or propose an improvement for an already existing cool thing!
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping shape **Nexo**! Before submitting, please keep our core design principles in mind:
+        - **Minimal Bloat:** Avoid redundant or overly niche expressions to keep Nexo fast.
+        - **Unified Syntax:** Features should feel natural in both `using py` and `using js` modes.
+
+  - type: dropdown
+    id: feature-category
+    attributes:
+      label: Feature Category
+      description: What area of Nexo does this request apply to?
+      options:
+        - Core Language / Parser (Variables, loops, events, functions)
+        - Python Mode (`using py`) Syntax
+        - JavaScript Mode (`using js`) Syntax
+        - Built-in Module Port (e.g., SkBee, Skellett, SkQuery, skRayFall, TuSKe)
+        - New First-Party Module / Addon Integration
+        - Developer Experience / Tooling (CLI, error messages, reload performance)
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem or Use Case
+      description: What problem does this solve, or what server mechanic are you trying to build?
+      placeholder: e.g., Currently, creating custom boss bars requires raw packet workarounds because skRayFall's boss bar syntax hasn't been ported yet.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution & `.nx` Syntax Example
+      description: Describe how you envision this working, and write a mockup of how the syntax should look in Python and/or JavaScript mode.
+      render: python
+      placeholder: |
+        # Python Mode example (`using py`)
+        using py
+        require(skrayfall)
+
+        @event("player_join")
+        def on_join(event):
+            bar = bossbar("Welcome!", color="green", progress=1.0)
+            bar.show(event.player)
+
+        // JavaScript Mode example (`using js`)
+        using js
+        require(skrayfall);
+
+        event("player_join", (e) => {
+            const bar = bossbar("Welcome!", { color: "green", progress: 1.0 });
+            bar.show(e.player);
+        });
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope-fit
+    attributes:
+      label: Where should this live?
+      description: Should this be part of Nexo's core syntax or elsewhere?
+      options:
+        - Core Nexo (Available globally without `require()`)
+        - Existing Built-in Module (e.g., `skbee`, `skquery`, `tuske`)
+        - New Separate Built-in Module
+        - Unsure / Open to discussion
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or Workarounds Considered
+      description: Have you tried solving this with existing Nexo features, or did Skript handle this in a way we should improve upon?
+      placeholder: e.g., Skript used 4 different English-like phrases for this, which can be simplified into a single clean method in Nexo.
