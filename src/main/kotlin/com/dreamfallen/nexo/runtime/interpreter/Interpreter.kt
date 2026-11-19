@@ -61,7 +61,10 @@ class Interpreter(
     /** Invoke a command registered via `@command(...)`. */
     fun dispatchCommand(commandName: String, sender: Any?, args: List<Any?> = emptyList()): Any? {
         val cmd = commands[commandName] ?: throw IllegalArgumentException("Unknown command '$commandName'")
-        return invoke(cmd.handler, listOf(sender) + args, emptyMap(), SourceLocation(1, 1))
+        val callArgs = ArrayList<Any?>(args.size + 1)
+        callArgs.add(sender)
+        callArgs.addAll(args)
+        return invoke(cmd.handler, callArgs, emptyMap(), SourceLocation(1, 1))
     }
 
     fun registeredEvents(): Set<String> = events.keys.toSet()
@@ -118,8 +121,10 @@ class Interpreter(
                     val items: Iterable<Any?> = when (iterableObj) {
                         is Iterable<*> -> iterableObj
                         is Map<*, *> -> iterableObj.keys
-                        is String -> iterableObj.map { it.toString() }
-                        is Array<*> -> iterableObj.toList()
+                        // Iterate lazily to avoid allocating a list and a string per character up front.
+                        is String -> iterableObj.asSequence().map { it.toString() }
+                        // asList() is backed by the array and avoids copying its elements.
+                        is Array<*> -> iterableObj.asList()
                         else -> throw ScriptException("Object is not iterable", statement.iterable.location)
                     }
                     val loopScope = scope.child()
@@ -170,8 +175,10 @@ class Interpreter(
         tick(expression.location)
         return when (expression) {
             is Literal -> expression.value
-            is InterpolatedString -> expression.parts.joinToString("") {
-                evaluate(it, scope)?.toString() ?: "null"
+            is InterpolatedString -> buildString {
+                expression.parts.forEach { part ->
+                    append(evaluate(part, scope)?.toString() ?: "null")
+                }
             }
             is Name -> scope.get(expression.value)
             is Member -> getMember(evaluate(expression.receiver, scope), expression.name)
