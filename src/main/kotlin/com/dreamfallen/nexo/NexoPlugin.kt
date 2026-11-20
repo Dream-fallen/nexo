@@ -76,7 +76,6 @@ class NexoPlugin : JavaPlugin(), Listener {
     }
 
     private fun registerBuiltInModules() {
-        // Register core module stubs so `require(skbee)` etc. resolve cleanly
         listOf("skbee", "skquery", "skellett", "skrayfall", "tuske").forEach { modName ->
             moduleRegistry.register(ModuleRegistry.NexoModule(modName, emptyMap()))
         }
@@ -88,110 +87,149 @@ class NexoPlugin : JavaPlugin(), Listener {
             if (registeredDynamicCommands.add(name.lowercase())) {
                 val bukkitCmd = object : BukkitCommand(name) {
                     init {
-description = cmdData.options["description"]?.toString() ?: "Nexo script command"
-usageMessage = cmdData.options["usage"]?.toString() ?: "/$name"
-permission = cmdData.options["permission"]?.toString()
-}
-override fun execute(sender: CommandSender, commandLabel: String, args: Array): Boolean {
-val wrappedSender = if (sender is Player) PlayerWrapper(sender) else SenderWrapper(sender)
-try {
-interpreter.dispatchCommand(name, wrappedSender, args.toList())
-} catch (e: Exception) {
-sender.sendMessage(PaperBridge.colorize("&cScript error: ${e.message}"))
-logger.severe("Error executing /$name: ${e.message}")
-}
-return true
-}
-}
-commandMap.register("nexo", bukkitCmd)
-}
-}
-}
-private fun syncSchedules() {
-for (schedule in interpreter.registeredSchedules()) {
-val ticks = parseIntervalTicks(schedule.interval)
-if (ticks <= 0L) {
-logger.warning("Invalid @every interval: ${schedule.interval}")
-continue
-}
-val task = Bukkit.getScheduler().runTaskTimer(this, Runnable {
-try {
-interpreter.dispatch("_schedule${schedule.hashCode()}", null)
-} catch (e: Exception) {
-logger.severe("Schedule execution error: ${e.message}")
-}
-}, ticks, ticks)
-scheduledTasks += task
-}
-}
-private fun parseIntervalTicks(raw: Any?): Long {
-if (raw is Number) return raw.toLong()
-val str = raw?.toString()?.trim()?.lowercase() ?: return -1L
-val parts = str.split(" ", limit = 2)
-val num = parts[0].toLongOrNull() ?: return -1L
-val unit = parts.getOrNull(1) ?: "ticks"
-return when {
-unit.startsWith("tick") -> num
-unit.startsWith("sec") -> num * 20L
-unit.startsWith("min") -> num * 20L * 60L
-unit.startsWith("hour") -> num * 20L * 3600L
-else -> -1L
-}
-}
-override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array): Boolean {
-if (command.name.equals("nexo", ignoreCase = true)) {
-when (args.firstOrNull()?.lowercase()) {
-"reload" -> {
-val count = reloadScripts()
-sender.sendMessage(PaperBridge.colorize("&aReloaded $count Nexo script(s)."))
-}
-"list" -> {
-val cmds = interpreter.registeredCommands().keys.joinToString(", ").ifEmpty { "none" }
-val evts = interpreter.registeredEvents().joinToString(", ").ifEmpty { "none" }
-sender.sendMessage(PaperBridge.colorize("&bEvents: &f$evts &7| &bCommands: &f$cmds"))
-}
-else -> sender.sendMessage(PaperBridge.colorize("&eUsage: /nexo <reload|list>"))
-}
-return true
-}
-return false
-}
-private fun safeDispatch(eventName: String, wrapper: EventWrapper) {
-try {
-interpreter.dispatch(eventName, wrapper)
-} catch (e: Exception) {
-logger.severe("Error handling event '$eventName': ${e.message}")
-}
-}
-@EventHandler
-fun onJoin(e: PlayerJoinEvent) = safeDispatch("player_join", EventWrapper(e))
-@EventHandler
-fun onQuit(e: PlayerQuitEvent) = safeDispatch("player_quit", EventWrapper(e))
-@EventHandler
-fun onChat(e: AsyncChatEvent) {
-val msg = PlainTextComponentSerializer.plainText().serialize(e.message())
-safeDispatch("player_chat", EventWrapper(e, mapOf("player" to PlayerWrapper(e.player), "message" to msg)))
-}
-@EventHandler
-fun onBreak(e: BlockBreakEvent) = safeDispatch("block_break", EventWrapper(e, mapOf("player" to PlayerWrapper(e.player))))
-@EventHandler
-fun onPlace(e: BlockPlaceEvent) = safeDispatch("block_place", EventWrapper(e, mapOf("player" to PlayerWrapper(e.player))))
-@EventHandler
-fun onInteract(e: PlayerInteractEvent) = safeDispatch("player_interact", EventWrapper(e))
-@EventHandler
-fun onDeath(e: PlayerDeathEvent) = safeDispatch("player_death", EventWrapper(e, mapOf("player" to PlayerWrapper(e.entity))))
-private fun writeDefaultExample(path: java.nio.file.Path) {
-Files.writeString(
-path,
-"""
-using py
-require(skbee)
-@event("player_join")
-def on_join(event):
-player = event.player
-player.send_message(f"&aWelcome to the server, {player.name}!")
-player.give(item("diamond_sword", amount=1))
-""".trimIndent()
-)
-}
+                        description = cmdData.options["description"]?.toString()
+                            ?: "Nexo script command"
+                        usageMessage = cmdData.options["usage"]?.toString() ?: "/$name"
+                        permission = cmdData.options["permission"]?.toString()
+                    }
+
+                    override fun execute(
+                        sender: CommandSender,
+                        commandLabel: String,
+                        args: Array<String>
+                    ): Boolean {
+                        val wrappedSender = if (sender is Player) {
+                            PlayerWrapper(sender)
+                        } else {
+                            SenderWrapper(sender)
+                        }
+                        try {
+                            interpreter.dispatchCommand(name, wrappedSender, args.toList())
+                        } catch (e: Exception) {
+                            sender.sendMessage(PaperBridge.colorize("&cScript error: ${e.message}"))
+                            logger.severe("Error executing /$name: ${e.message}")
+                        }
+                        return true
+                    }
+                }
+                commandMap.register("nexo", bukkitCmd)
+            }
+        }
+    }
+
+    private fun syncSchedules() {
+        for (schedule in interpreter.registeredSchedules()) {
+            val ticks = parseIntervalTicks(schedule.interval)
+            if (ticks <= 0L) {
+                logger.warning("Invalid @every interval: ${schedule.interval}")
+                continue
+            }
+            val scheduleName = "_schedule${schedule.hashCode()}"
+            val task = Bukkit.getScheduler().runTaskTimer(this, Runnable {
+                try {
+                    interpreter.dispatch(scheduleName, null)
+                } catch (e: Exception) {
+                    logger.severe("Schedule execution error: ${e.message}")
+                }
+            }, ticks, ticks)
+            scheduledTasks += task
+        }
+    }
+
+    private fun parseIntervalTicks(raw: Any?): Long {
+        if (raw is Number) return raw.toLong()
+        val str = raw?.toString()?.trim()?.lowercase() ?: return -1L
+        val parts = str.split(" ", limit = 2)
+        val num = parts[0].toLongOrNull() ?: return -1L
+        val unit = parts.getOrNull(1) ?: "ticks"
+        return when {
+            unit.startsWith("tick") -> num
+            unit.startsWith("sec") -> num * 20L
+            unit.startsWith("min") -> num * 20L * 60L
+            unit.startsWith("hour") -> num * 20L * 3600L
+            else -> -1L
+        }
+    }
+
+    override fun onCommand(
+        sender: CommandSender,
+        command: Command,
+        label: String,
+        args: Array<String>
+    ): Boolean {
+        if (command.name.equals("nexo", ignoreCase = true)) {
+            when (args.firstOrNull()?.lowercase()) {
+                "reload" -> {
+                    val count = reloadScripts()
+                    sender.sendMessage(PaperBridge.colorize("&aReloaded $count Nexo script(s)."))
+                }
+                "list" -> {
+                    val cmds = interpreter.registeredCommands().keys.joinToString(" , ").ifEmpty { "none" }
+                    val evts = interpreter.registeredEvents().joinToString(", ").ifEmpty { "none" }
+                    sender.sendMessage(PaperBridge.colorize("&bEvents: &f$evts &7| &bCommands: &f$cmds"))
+                }
+                else -> sender.sendMessage(PaperBridge.colorize("&eUsage: /nexo <reload|list>"))
+            }
+            return true
+        }
+        return false
+    }
+
+    private fun safeDispatch(eventName: String, wrapper: EventWrapper) {
+        try {
+            interpreter.dispatch(eventName, wrapper)
+        } catch (e: Exception) {
+            logger.severe("Error handling event '$eventName': ${e.message}")
+        }
+    }
+
+    @EventHandler
+    fun onJoin(e: PlayerJoinEvent) = safeDispatch("player_join", EventWrapper(e))
+
+    @EventHandler
+    fun onQuit(e: PlayerQuitEvent) = safeDispatch("player_quit", EventWrapper(e))
+
+    @EventHandler
+    fun onChat(e: AsyncChatEvent) {
+        val msg = PlainTextComponentSerializer.plainText().serialize(e.message())
+        safeDispatch(
+            "player_chat",
+            EventWrapper(e, mapOf("player" to PlayerWrapper(e.player), "message" to msg))
+        )
+    }
+
+    @EventHandler
+    fun onBreak(e: BlockBreakEvent) {
+        safeDispatch("block_break", EventWrapper(e, mapOf("player" to PlayerWrapper(e.player))))
+    }
+
+    @EventHandler
+    fun onPlace(e: BlockPlaceEvent) {
+        safeDispatch("block_place", EventWrapper(e, mapOf("player" to PlayerWrapper(e.player))))
+    }
+
+    @EventHandler
+    fun onInteract(e: PlayerInteractEvent) {
+        safeDispatch("player_interact", EventWrapper(e))
+    }
+
+    @EventHandler
+    fun onDeath(e: PlayerDeathEvent) {
+        safeDispatch("player_death", EventWrapper(e, mapOf("player" to PlayerWrapper(e.entity))))
+    }
+
+    private fun writeDefaultExample(path: java.nio.file.Path) {
+        Files.writeString(
+            path,
+            """
+            using py
+            require(skbee)
+            @event("player_join")
+            def on_join(event):
+                player = event.player
+                player.send_message(f"&aWelcome to the server, {player.name}!")
+                player.give(item("diamond_sword", amount=1))
+            """.trimIndent()
+        )
+    }
 }
