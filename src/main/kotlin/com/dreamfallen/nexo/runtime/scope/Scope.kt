@@ -1,8 +1,9 @@
 package com.dreamfallen.nexo.runtime.scope
 
-/** Lexically nested environment; local writes stay local unless a name already exists in an outer scope. */
+/** Lexically nested environment supporting both JS-style outer mutation and Python-style local binding. */
 class Scope(private val parent: Scope? = null) {
     private val values = HashMap<String, Any?>()
+
     fun define(name: String, value: Any?) { values[name] = value }
     fun containsLocal(name: String) = values.containsKey(name)
 
@@ -15,6 +16,7 @@ class Scope(private val parent: Scope? = null) {
         throw IllegalArgumentException("Undefined variable '$name'")
     }
 
+    /** Mutates an existing variable in outer scopes if found, otherwise defines locally (JS behavior). */
     fun assign(name: String, value: Any?) {
         var scope: Scope? = this
         while (scope != null) {
@@ -24,6 +26,11 @@ class Scope(private val parent: Scope? = null) {
             }
             scope = scope.parent
         }
+        values[name] = value
+    }
+
+    /** Always binds in the current local scope unless not in a child scope (Python behavior). */
+    fun assignLocal(name: String, value: Any?) {
         values[name] = value
     }
 
