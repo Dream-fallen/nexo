@@ -11,6 +11,13 @@ data class ScriptException(message: String, val location: SourceLocation? = null
 )
 
 sealed interface Statement { val location: SourceLocation }
+data class RequireStatement(
+    val moduleName: String,
+    val alias: String? = null,
+    val priority: Int? = null,
+    override val location: SourceLocation
+) : Statement
+
 data class ExpressionStatement(val expression: Expression, override val location: SourceLocation) : Statement
 data class VariableDeclaration(val name: String, val value: Expression?, override val location: SourceLocation) : Statement
 data class Assignment(val target: Expression, val value: Expression, override val location: SourceLocation) : Statement
