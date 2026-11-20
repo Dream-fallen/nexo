@@ -6,18 +6,31 @@ import com.dreamfallen.nexo.lang.parser.Parser
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Logger
 
 /** Loads and compiles .nx files. Cache entries are invalidated using size and last-modified time. */
-class ScriptLoader(private val scriptsDirectory: Path) {
+class ScriptLoader(
+    private val scriptsDirectory: Path,
+    private val logger: Logger? = null
+) {
     private data class Cached(val modified: Long, val size: Long, val program: Program)
     private val cache = ConcurrentHashMap<Path, Cached>()
 
     fun loadAll(): List<Program> {
         if (!Files.exists(scriptsDirectory)) Files.createDirectories(scriptsDirectory)
-        return Files.walk(scriptsDirectory).use { paths ->
+        val programs = ArrayList<Program>()
+        Files.walk(scriptsDirectory).use { paths ->
             paths.filter { Files.isRegularFile(it) && it.fileName.toString().endsWith(".nx", ignoreCase = true) }
-                .sorted().map { load(it) }.toList()
+                .sorted()
+                .forEach { file ->
+                    try {
+                        programs += load(file)
+                    } catch (e: Exception) {
+                        logger?.severe("Failed to load script '${file.fileName}': ${e.message}")
+                    }
+                }
         }
+        return programs
     }
 
     fun load(file: Path): Program {
@@ -27,8 +40,11 @@ class ScriptLoader(private val scriptsDirectory: Path) {
         val size = Files.size(normalized)
         cache[normalized]?.let { if (it.modified == modified && it.size == size) return it.program }
         val source = Files.readString(normalized)
-        val program = try { Parser(source, normalized.fileName.toString()).parse() }
-        catch (e: ScriptException) { throw e }
+        val program = try {
+            Parser(source, normalized.fileName.toString()).parse()
+        } catch (e: ScriptException) {
+            throw e
+        }
         cache[normalized] = Cached(modified, size, program)
         return program
     }

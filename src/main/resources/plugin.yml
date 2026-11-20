@@ -1,18 +1,17 @@
 name: Nexo
-version: '${project.version}'
-main: com.dreamfallen.nexo.Nexo
+version: ${project.version}
+main: com.dreamfallen.nexo.NexoPlugin
 api-version: '1.21'
-authors: [Dream-fallen]
-description: An overhaul of the Minecraft Skript plugin/language with Python and JavaScript syntax.
+description: Modern Python/JavaScript scripting engine for PaperMC
+authors: [Dreamfallen]
 
 commands:
   nexo:
-    description: Main command for managing Nexo scripts.
-    usage: /<command> <reload|enable|disable|info>
-    aliases: [nx]
+    description: Manage Nexo scripts
+    usage: /nexo <reload|list>
     permission: nexo.admin
 
 permissions:
   nexo.admin:
-    description: Grants full access to Nexo script management commands.
+    description: Allows reloading and managing Nexo scripts
     default: op
